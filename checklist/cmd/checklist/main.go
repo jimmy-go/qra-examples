@@ -45,10 +45,9 @@ import (
 )
 
 var (
-	port       = flag.Int("port", 5050, "Listen port.")
-	templates  = flag.String("templates", "", "Templates dir.")
-	static     = flag.String("static", "", "Static dir.")
-	connectURL = flag.String("db", "", "PostgreSQL url connection (Business Logic).")
+	port      = flag.Int("port", 5050, "Listen port.")
+	templates = flag.String("templates", "", "Templates dir.")
+	static    = flag.String("static", "", "Static dir.")
 )
 
 func main() {
@@ -56,7 +55,6 @@ func main() {
 	log.SetFlags(0)
 	log.Printf("templates [%v]", *templates)
 	log.Printf("static [%v]", *static)
-	log.Printf("connection url [%v]", *connectURL)
 	log.SetFlags(log.Lshortfile)
 
 	// qra logic
@@ -68,9 +66,6 @@ func main() {
 	// business logic
 
 	err = srest.LoadViews(*templates, srest.DefaultFuncMap)
-	P(err)
-
-	err = dai.Configure("postgres", *connectURL)
 	P(err)
 
 	m := srest.New(nil)
