@@ -35,13 +35,13 @@ import (
 	// import driver PostgreSQL
 	_ "github.com/lib/pq"
 
-	"github.com/jimmy-go/qra/examples/checklist/auth"
-	"github.com/jimmy-go/qra/examples/checklist/dai"
-	"github.com/jimmy-go/qra/examples/checklist/list"
-	"github.com/jimmy-go/qra/examples/checklist/session"
-	"github.com/jimmy-go/qra/examples/checklist/users"
+	"github.com/jimmy-go/qra-examples/checklist/auth"
+	"github.com/jimmy-go/qra-examples/checklist/dai"
+	"github.com/jimmy-go/qra-examples/checklist/list"
+	"github.com/jimmy-go/qra-examples/checklist/session"
+	"github.com/jimmy-go/qra-examples/checklist/users"
 	"github.com/jimmy-go/qra/rawmanager"
-	"github.com/jimmy-go/srest"
+	"gopkg.in/jimmy-go/srest.v0"
 )
 
 var (

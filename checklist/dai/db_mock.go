@@ -18,5 +18,5 @@ func Configure(driver, connectURL string) error {
 
 // Close closes database connections.
 func Close() {
-	Db.Close()
+	// Db.Close()
 }

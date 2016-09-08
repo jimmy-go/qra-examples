@@ -16,7 +16,7 @@ func MW(h http.Handler) http.Handler {
 
 		sess, err := qra.SessionLocate(token)
 		if err != nil {
-			log.Printf("AuthMW : qra : session : err [%s]", err)
+			log.Printf("AuthMW : qra : session : err [%s] path [%s]", err, r.RequestURI)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}

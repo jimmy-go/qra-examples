@@ -29,26 +29,32 @@ import (
 	"net/http"
 
 	"github.com/jimmy-go/qra"
-	"github.com/jimmy-go/srest"
+	"gopkg.in/jimmy-go/srest.v0"
 )
 
 // Index endpoint /login GET
 func Index(w http.ResponseWriter, r *http.Request) {
 	v := map[string]interface{}{}
 
-	srest.Render(w, "login.html", v)
+	err := srest.Render(w, "login.html", v)
+	if err != nil {
+		log.Printf("Index : Render : err [%s]", err)
+	}
 }
 
 // Login endpoint /login POST
 func Login(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("Login : parse form : err [%s]", err)
+	}
 
 	u := r.Form.Get("username")
 	p := r.Form.Get("password")
 	log.Printf("Login : username [%s] password [%s]", u, p)
 
 	// qra.Login calls qra.DefaultManager.Sessioner.Login method
-	err := qra.Login(u, p)
+	err = qra.Login(u, p)
 	if err != nil {
 		log.Printf("Login : err [%s]", err)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)

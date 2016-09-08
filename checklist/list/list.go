@@ -26,7 +26,7 @@ package list
 import (
 	"net/http"
 
-	"github.com/jimmy-go/srest"
+	"gopkg.in/jimmy-go/srest.v0"
 )
 
 // Index endpoint /list GET
