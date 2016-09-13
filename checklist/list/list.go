@@ -24,7 +24,12 @@
 package list
 
 import (
+	"log"
 	"net/http"
+
+	"github.com/jimmy-go/qra-examples/checklist/dai"
+	"github.com/jimmy-go/qra-examples/checklist/menu"
+	"github.com/jimmy-go/qra-examples/checklist/sessions"
 
 	"gopkg.in/jimmy-go/srest.v0"
 )
@@ -32,6 +37,25 @@ import (
 // Index endpoint /list GET
 func Index(w http.ResponseWriter, r *http.Request) {
 	v := map[string]interface{}{}
+	userID, err := sessions.UserID(w, r)
+	if err != nil {
+		log.Printf("Index : cooksess : err [%s]", err)
+	}
+	log.Printf("Index : userID [%s]", userID)
 
-	srest.Render(w, "list/index.html", v)
+	menus := menu.UserMenus(userID)
+	log.Printf("Index : user menus [%v][%v]", len(menus), menus)
+	v["menus"] = menus
+
+	list, err := dai.Db.List(userID)
+	if err != nil {
+		log.Printf("Index : dai : err [%s]", err)
+	}
+
+	v["user_checklist"] = list
+
+	err = srest.Render(w, "list/index.html", v)
+	if err != nil {
+		log.Printf("Index : Render : err [%s]", err)
+	}
 }

@@ -5,22 +5,20 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jimmy-go/qra"
+	"github.com/jimmy-go/qra-examples/checklist/sessions"
 )
 
-// MW authentication middleware.
-func MW(h http.Handler) http.Handler {
+// Handler authentication middleware.
+func Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		log.Printf("Auth : MW : token [%v]", token)
-
-		sess, err := qra.SessionLocate(token)
+		token, err := sessions.UserID(w, r)
 		if err != nil {
-			log.Printf("AuthMW : qra : session : err [%s] path [%s]", err, r.RequestURI)
+			log.Printf("Handler : qra : cooktoken : err [%s] path [%s]", err, r.RequestURI)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		log.Printf("AuthMW : qra : session [%v]", sess)
+
+		log.Printf("Handler : token [%v]", token)
 
 		h.ServeHTTP(w, r)
 	})

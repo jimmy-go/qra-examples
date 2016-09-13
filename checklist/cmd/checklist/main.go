@@ -35,10 +35,12 @@ import (
 	// import driver PostgreSQL
 	_ "github.com/lib/pq"
 
+	"github.com/gorilla/context"
 	"github.com/jimmy-go/qra-examples/checklist/auth"
 	"github.com/jimmy-go/qra-examples/checklist/dai"
 	"github.com/jimmy-go/qra-examples/checklist/list"
 	"github.com/jimmy-go/qra-examples/checklist/session"
+	"github.com/jimmy-go/qra-examples/checklist/sessions"
 	"github.com/jimmy-go/qra-examples/checklist/users"
 	"github.com/jimmy-go/qra/rawmanager"
 	"gopkg.in/jimmy-go/srest.v0"
@@ -48,6 +50,7 @@ var (
 	port      = flag.Int("port", 5050, "Listen port.")
 	templates = flag.String("templates", "", "Templates dir.")
 	static    = flag.String("static", "", "Static dir.")
+	cookskey  = flag.String("cookies-key", "0Kq3cmiTZNbUPZcybgdc", "Gorilla sessions cookie secret.")
 )
 
 func main() {
@@ -64,19 +67,23 @@ func main() {
 	P(err)
 
 	// business logic
+	err = dai.Configure()
+	P(err)
 
 	err = srest.LoadViews(*templates, srest.DefaultFuncMap)
+	P(err)
+	err = sessions.Configure(*cookskey)
 	P(err)
 
 	m := srest.New(nil)
 	m.Debug(true)
 	m.Get("/static/", srest.Static("/static/", *static))
-	m.Get("/", http.HandlerFunc(users.Index), auth.MW)
-	m.Get("/login", http.HandlerFunc(session.Index))
-	m.Post("/login", http.HandlerFunc(session.Login))
-	m.Get("/logout", http.HandlerFunc(session.Logout), auth.MW)
-	m.Get("/users", http.HandlerFunc(users.Index), auth.MW)
-	m.Get("/checklist", http.HandlerFunc(list.Index), auth.MW)
+	m.Get("/", http.HandlerFunc(users.Index), auth.Handler, context.ClearHandler)
+	m.Get("/login", http.HandlerFunc(session.Index), context.ClearHandler)
+	m.Post("/login", http.HandlerFunc(session.Login), context.ClearHandler)
+	m.Get("/logout", http.HandlerFunc(session.Logout), auth.Handler, context.ClearHandler)
+	m.Get("/users", http.HandlerFunc(users.Index), auth.Handler, context.ClearHandler)
+	m.Get("/checklist", http.HandlerFunc(list.Index), auth.Handler, context.ClearHandler)
 	<-m.Run(*port)
 	dai.Close()
 }
