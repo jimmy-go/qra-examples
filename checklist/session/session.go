@@ -72,7 +72,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	// take session from somewhere
 	sessionID := r.Header.Get("Authorization")
 
-	userCtx := sessions.Ctx(sessionID)
+	userCtx := sessions.Ctx("", sessionID)
 
 	err := qra.Close(userCtx)
 	if err != nil {

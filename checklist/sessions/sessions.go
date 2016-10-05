@@ -24,7 +24,9 @@
 package sessions
 
 import (
+	"bytes"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -109,6 +111,17 @@ func Delete(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	session.Options.MaxAge = -1
+
+	username, _ := session.Values["user_id"].(string)
+	token, _ := session.Values["session_token"].(string)
+	log.Printf("Delete : username [%s] token [%s]", username, token)
+
+	ctx := Ctx(username, token)
+	err = qra.Close(ctx)
+	if err != nil {
+		return err
+	}
+
 	return session.Save(r, w)
 }
 
@@ -116,14 +129,30 @@ func Delete(w http.ResponseWriter, r *http.Request) error {
 func Login(username, password string) (string, error) {
 	var token string
 
-	ctx := Ctx(username)
+	ctx := Ctx(username, "")
+
+	// identity: authentication.
 
 	err := qra.Authenticate(ctx, password, &token)
-	return token, err
+	if err != nil {
+		return "", err
+	}
+	log.Printf("Login : username [%v] token [%v]", ctx.Me(), token)
+
+	// validation: identity permission for session on web admin.
+
+	buf := bytes.NewBuffer([]byte{})
+	err = qra.Search(ctx, buf, "session-on:web")
+	if err != nil {
+		return "", err
+	}
+	log.Printf("Login : buf [%v]", buf.String())
+
+	return token, nil
 }
 
 // Ctx returns a type that satisfies qra.Identity interface.
-func Ctx(username string) qra.Identity {
+func Ctx(username, token string) qra.Identity {
 	return User{Username: username}
 }
 
@@ -140,5 +169,6 @@ func (ctx User) Me() string {
 
 // Session returns user id.
 func (ctx User) Session(dst interface{}) error {
+	dst = ctx.Token
 	return nil
 }
