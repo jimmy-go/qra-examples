@@ -1,0 +1,35 @@
+hash: 18ea42f96fb5c851edebae6eadb915e7b14329d4c3d9472d7e7432d0f6890f4a
+updated: 2016-10-05T00:05:07.162520699-05:00
+imports:
+- name: github.com/bmizerany/pat
+  version: c068ca2f0aacee5ac3681d68e4d0a003b7d1fd2c
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/schema
+  version: 0164a00ab4cd01d814d8cd5bf63fd9fcea30e23b
+- name: github.com/gorilla/securecookie
+  version: fa5329f913702981df43dcb2a380bac429c810b5
+- name: github.com/gorilla/sessions
+  version: ca9ada44574153444b00d3fd9c8559e4cc95f896
+- name: github.com/jimmy-go/pgwp
+  version: 445fa21731d6208357de93b3d03770d5cb8897ab
+- name: github.com/jimmy-go/qra
+  version: 1520549d329fbf3b5c7b79a21a0dd566887300ed
+  subpackages:
+  - pgmanager
+  - rawmanager
+- name: github.com/jmoiron/sqlx
+  version: 05b81a7d5d38058e42148dc01f17daf4acba4640
+  subpackages:
+  - reflectx
+- name: github.com/lib/pq
+  version: 50761b0867bd1d9d069276790bcd4a3bccf2324a
+  subpackages:
+  - oid
+- name: github.com/mattn/go-sqlite3
+  version: e5a3c16c5c1d80b24f633e68aecd6b0702786d3d
+- name: github.com/satori/go.uuid
+  version: b061729afc07e77a8aa4fad0a2fd840958f1942a
+- name: gopkg.in/jimmy-go/srest.v0
+  version: 4be32f2e5bbfb9656f1fb9d4c45d146a120a6b72
+testImports: []

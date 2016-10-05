@@ -1,0 +1,11 @@
+package: github.com/jimmy-go/qra-examples
+import:
+- package: github.com/gorilla/context
+- package: github.com/gorilla/sessions
+- package: github.com/jimmy-go/qra
+  subpackages:
+  - pgmanager
+  - rawmanager
+- package: github.com/lib/pq
+- package: github.com/mattn/go-sqlite3
+- package: gopkg.in/jimmy-go/srest.v0
