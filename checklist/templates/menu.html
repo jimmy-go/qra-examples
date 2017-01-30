@@ -1,0 +1,20 @@
+<ul class="sidebar-menu">
+    <li class="header">MAIN NAVIGATION</li>
+    {{if $.menus}}
+        {{range $.menus}}
+        <li>
+            <a href="{{.Link}}">
+                <i class="{{.Icon}}"></i> <span>{{.Name}}</span>
+                <span class="pull-right-container">
+                    <small class="label pull-right bg-green">{{.Badge}}</small>
+                </span>
+            </a>
+        </li>
+        {{end}}
+    {{else}}
+        <li>
+            No menus for this user.
+        </li>
+    {{end}}
+</ul>
+

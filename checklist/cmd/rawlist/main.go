@@ -32,23 +32,23 @@ import (
 	// import driver SQLite
 	_ "github.com/mattn/go-sqlite3"
 
-	// import driver PostgreSQL
-	_ "github.com/lib/pq"
+	srest "gopkg.in/jimmy-go/srest.v0"
 
-	"github.com/jimmy-go/qra/examples/checklist/auth"
-	"github.com/jimmy-go/qra/examples/checklist/dai"
-	"github.com/jimmy-go/qra/examples/checklist/list"
-	"github.com/jimmy-go/qra/examples/checklist/session"
-	"github.com/jimmy-go/qra/examples/checklist/users"
+	"github.com/gorilla/context"
+	"github.com/jimmy-go/qra-examples/checklist/auth"
+	"github.com/jimmy-go/qra-examples/checklist/dai"
+	"github.com/jimmy-go/qra-examples/checklist/list"
+	"github.com/jimmy-go/qra-examples/checklist/session"
+	"github.com/jimmy-go/qra-examples/checklist/sessions"
+	"github.com/jimmy-go/qra-examples/checklist/users"
 	"github.com/jimmy-go/qra/rawmanager"
-	"github.com/jimmy-go/srest"
 )
 
 var (
-	port       = flag.Int("port", 5050, "Listen port.")
-	templates  = flag.String("templates", "", "Templates dir.")
-	static     = flag.String("static", "", "Static dir.")
-	connectURL = flag.String("db", "", "PostgreSQL url connection (Business Logic).")
+	port      = flag.Int("port", 5050, "Listen port.")
+	templates = flag.String("templates", "", "Templates dir.")
+	static    = flag.String("static", "", "Static dir.")
+	cookskey  = flag.String("cookies-key", "0Kq3cmiTZNbUPZcybgdc", "Gorilla sessions cookie secret.")
 )
 
 func main() {
@@ -56,7 +56,6 @@ func main() {
 	log.SetFlags(0)
 	log.Printf("templates [%v]", *templates)
 	log.Printf("static [%v]", *static)
-	log.Printf("connection url [%v]", *connectURL)
 	log.SetFlags(log.Lshortfile)
 
 	// qra logic
@@ -66,22 +65,23 @@ func main() {
 	P(err)
 
 	// business logic
+	err = dai.Configure()
+	P(err)
 
 	err = srest.LoadViews(*templates, srest.DefaultFuncMap)
 	P(err)
-
-	err = dai.Configure("postgres", *connectURL)
+	err = sessions.Configure(*cookskey)
 	P(err)
 
 	m := srest.New(nil)
 	m.Debug(true)
 	m.Get("/static/", srest.Static("/static/", *static))
-	m.Get("/", http.HandlerFunc(users.Index), auth.MW)
-	m.Get("/login", http.HandlerFunc(session.Index))
-	m.Post("/login", http.HandlerFunc(session.Login))
-	m.Get("/logout", http.HandlerFunc(session.Logout), auth.MW)
-	m.Get("/users", http.HandlerFunc(users.Index), auth.MW)
-	m.Get("/checklist", http.HandlerFunc(list.Index), auth.MW)
+	m.Get("/", http.HandlerFunc(users.Index), auth.Handler, context.ClearHandler)
+	m.Get("/login", http.HandlerFunc(session.Index), context.ClearHandler)
+	m.Post("/login", http.HandlerFunc(session.Login), context.ClearHandler)
+	m.Get("/logout", http.HandlerFunc(session.Logout), auth.Handler, context.ClearHandler)
+	m.Get("/users", http.HandlerFunc(users.Index), auth.Handler, context.ClearHandler)
+	m.Get("/checklist", http.HandlerFunc(list.Index), auth.Handler, context.ClearHandler)
 	<-m.Run(*port)
 	dai.Close()
 }

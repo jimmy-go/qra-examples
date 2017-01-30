@@ -27,14 +27,26 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jimmy-go/srest"
+	"github.com/jimmy-go/qra-examples/checklist/menu"
+	"github.com/jimmy-go/qra-examples/checklist/sessions"
+
+	"gopkg.in/jimmy-go/srest.v0"
 )
 
 // Index endpoint /users GET
 func Index(w http.ResponseWriter, r *http.Request) {
 	v := map[string]interface{}{}
+	userID, err := sessions.UserID(w, r)
+	if err != nil {
+		log.Printf("Index : cooksess : err [%s]", err)
+	}
+	log.Printf("Index : userID [%s]", userID)
 
-	err := srest.Render(w, "users/index.html", v)
+	menus := menu.UserMenus(userID)
+	log.Printf("Index : user menus [%v][%v]", len(menus), menus)
+	v["menus"] = menus
+
+	err = srest.Render(w, "users/index.html", v)
 	if err != nil {
 		log.Printf("Index : Render : err [%s]", err)
 	}

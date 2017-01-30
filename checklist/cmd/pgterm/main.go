@@ -1,4 +1,4 @@
-// Package list contains TO-DO list by User.
+// Package main contains terminal session for pgmanager.
 //
 // MIT License
 //
@@ -21,41 +21,28 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-package list
+package main
 
 import (
+	"flag"
 	"log"
-	"net/http"
 
-	"github.com/jimmy-go/qra-examples/checklist/dai"
-	"github.com/jimmy-go/qra-examples/checklist/menu"
-	"github.com/jimmy-go/qra-examples/checklist/sessions"
+	// import driver PostgreSQL
+	_ "github.com/lib/pq"
 
-	"gopkg.in/jimmy-go/srest.v0"
+	"github.com/jimmy-go/qra/pgmanager"
 )
 
-// Index endpoint /list GET
-func Index(w http.ResponseWriter, r *http.Request) {
-	v := map[string]interface{}{}
-	userID, err := sessions.UserID(w, r)
-	if err != nil {
-		log.Printf("Index : cooksess : err [%s]", err)
-	}
-	log.Printf("Index : userID [%s]", userID)
+var (
+	connectURL = flag.String("db-url", "", "PostgreSQL connection url.")
+)
 
-	menus := menu.UserMenus(userID)
-	log.Printf("Index : user menus [%v][%v]", len(menus), menus)
-	v["menus"] = menus
+func main() {
+	flag.Parse()
+	log.SetFlags(log.Lshortfile)
 
-	list, err := dai.Db.List(userID)
-	if err != nil {
-		log.Printf("Index : dai : err [%s]", err)
-	}
-
-	v["user_checklist"] = list
-
-	err = srest.Render(w, "list/index.html", v)
-	if err != nil {
-		log.Printf("Index : Render : err [%s]", err)
+	// register qra/pgmanager as qra.DefaultManager
+	if err := pgmanager.Terminal("postgres", *connectURL); err != nil {
+		log.Fatal(err)
 	}
 }
