@@ -1,4 +1,4 @@
-// Package list contains TO-DO list by User.
+// Package menu contains menu validation for users.
 //
 // MIT License
 //
@@ -21,41 +21,72 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-package list
+package menu
 
 import (
 	"log"
-	"net/http"
 
-	"github.com/jimmy-go/qra-examples/checklist/dai"
-	"github.com/jimmy-go/qra-examples/checklist/menu"
-	"github.com/jimmy-go/qra-examples/checklist/sessions"
-
-	"gopkg.in/jimmy-go/srest.v0"
+	"github.com/jimmy-go/qra"
 )
 
-// Index endpoint /list GET
-func Index(w http.ResponseWriter, r *http.Request) {
-	v := map[string]interface{}{}
-	userID, err := sessions.UserID(w, r)
-	if err != nil {
-		log.Printf("Index : cooksess : err [%s]", err)
+// Menu struct represents UI menu.
+type Menu struct {
+	Name  string
+	Role  string
+	Icon  string
+	Link  string
+	Badge int
+}
+
+var (
+	// Menus and roles required.
+	Menus = map[string]Menu{
+		"admin": Menu{
+			Name:  "Users",
+			Role:  "admins",
+			Icon:  "fa fa-users",
+			Link:  "/users",
+			Badge: 0,
+		},
+		"users": Menu{
+			Name:  "TO-DOs",
+			Role:  "users",
+			Icon:  "fa fa-list",
+			Link:  "/checklist",
+			Badge: 0,
+		},
 	}
-	log.Printf("Index : userID [%s]", userID)
+)
 
-	menus := menu.UserMenus(userID)
-	log.Printf("Index : user menus [%v][%v]", len(menus), menus)
-	v["menus"] = menus
+// UserMenus returns user available menus.
+func UserMenus(userID string) []Menu {
+	var list []Menu
+	for i := range Menus {
+		menu := Menus[i]
 
-	list, err := dai.Db.List(userID)
-	if err != nil {
-		log.Printf("Index : dai : err [%s]", err)
+		log.Printf("UserMenus : menu [%v]", menu)
+
+		err := qra.Search(Ctx{userID}, nil, "read:"+menu.Role)
+		if err != nil {
+			continue
+		}
+		list = append(list, menu)
 	}
+	return list
+}
 
-	v["user_checklist"] = list
+// Ctx satisfies Identity interface.
+type Ctx struct {
+	UserID string
+}
 
-	err = srest.Render(w, "list/index.html", v)
-	if err != nil {
-		log.Printf("Index : Render : err [%s]", err)
-	}
+// Me method.
+func (c Ctx) Me() string {
+	return c.UserID
+}
+
+// Session method.
+func (c Ctx) Session(dst interface{}) error {
+	// DO nothing
+	return nil
 }

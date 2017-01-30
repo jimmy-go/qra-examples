@@ -28,39 +28,42 @@ import (
 	"log"
 	"net/http"
 
+	srest "gopkg.in/jimmy-go/srest.v0"
+
 	"github.com/jimmy-go/qra"
-	"github.com/jimmy-go/srest"
+	"github.com/jimmy-go/qra-examples/checklist/sessions"
 )
 
 // Index endpoint /login GET
 func Index(w http.ResponseWriter, r *http.Request) {
 	v := map[string]interface{}{}
 
-	srest.Render(w, "login.html", v)
+	err := srest.Render(w, "login.html", v)
+	if err != nil {
+		log.Printf("Index : Render : err [%s]", err)
+	}
 }
 
 // Login endpoint /login POST
 func Login(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("Login : parse form : err [%s]", err)
+	}
 
 	u := r.Form.Get("username")
 	p := r.Form.Get("password")
 	log.Printf("Login : username [%s] password [%s]", u, p)
 
-	// qra.Login calls qra.DefaultManager.Sessioner.Login method
-	err := qra.Login(u, p)
+	// qra.Authenticate calls qra.DefaultManager.Authentication.Authenticate method
+	token, err := sessions.Login(u, p)
 	if err != nil {
 		log.Printf("Login : err [%s]", err)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 
-	var userID string
-	token, err := qra.SessionCreate(userID)
-	if err != nil {
-		log.Printf("Login : err [%s]", err)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-	}
-	log.Printf("Login : token : [%s]", token)
+	E("set token", sessions.SetToken(w, r, token))
+	E("set user id", sessions.SetUserID(w, r, u))
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -69,10 +72,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	// take session from somewhere
 	sessionID := r.Header.Get("Authorization")
-	err := qra.SessionDelete(sessionID)
+
+	userCtx := sessions.Ctx("", sessionID)
+
+	err := qra.Close(userCtx)
 	if err != nil {
 		log.Printf("Logout : err [%s]", err)
 	}
 
+	E("delete cookie session", sessions.Delete(w, r))
+
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+// E func logs errors if exists.
+func E(name string, err error) {
+	if err != nil {
+		log.Printf("%s : err [%s]", name, err)
+	}
 }
