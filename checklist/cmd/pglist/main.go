@@ -32,6 +32,9 @@ import (
 	// import driver PostgreSQL
 	_ "github.com/lib/pq"
 
+	"gopkg.in/jimmy-go/qra.v0/pgmanager"
+	srest "gopkg.in/jimmy-go/srest.v0"
+
 	"github.com/gorilla/context"
 	"github.com/jimmy-go/qra-examples/checklist/auth"
 	"github.com/jimmy-go/qra-examples/checklist/dai"
@@ -39,8 +42,6 @@ import (
 	"github.com/jimmy-go/qra-examples/checklist/session"
 	"github.com/jimmy-go/qra-examples/checklist/sessions"
 	"github.com/jimmy-go/qra-examples/checklist/users"
-	"github.com/jimmy-go/qra/pgmanager"
-	"gopkg.in/jimmy-go/srest.v0"
 )
 
 var (
@@ -53,25 +54,25 @@ var (
 
 func main() {
 	flag.Parse()
-	log.SetFlags(0)
-	log.Printf("templates [%v]", *templates)
-	log.Printf("static [%v]", *static)
 	log.SetFlags(log.Lshortfile)
 
-	// qra logic
-
 	// register qra/pgmanager as qra.DefaultManager
-	err := pgmanager.Connect("postgres", *connectURL, true)
-	P(err)
+	if err := pgmanager.Connect("postgres", *connectURL); err != nil {
+		log.Fatal(err)
+	}
 
 	// business logic
-	err = dai.Configure()
-	P(err)
+	if err := dai.Configure(); err != nil {
+		log.Fatal(err)
+	}
 
-	err = srest.LoadViews(*templates, srest.DefaultFuncMap)
-	P(err)
-	err = sessions.Configure(*cookskey)
-	P(err)
+	if err := srest.LoadViews(*templates, srest.DefaultFuncMap); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := sessions.Configure(*cookskey); err != nil {
+		log.Fatal(err)
+	}
 
 	m := srest.New(nil)
 	m.Debug(true)
@@ -84,11 +85,4 @@ func main() {
 	m.Get("/checklist", http.HandlerFunc(list.Index), auth.Handler, context.ClearHandler)
 	<-m.Run(*port)
 	dai.Close()
-}
-
-// P panics if error is present.
-func P(err error) {
-	if err != nil {
-		panic(err)
-	}
 }

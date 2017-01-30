@@ -24,7 +24,6 @@
 package sessions
 
 import (
-	"bytes"
 	"errors"
 	"log"
 	"net/http"
@@ -141,12 +140,10 @@ func Login(username, password string) (string, error) {
 
 	// validation: identity permission for session on web admin.
 
-	buf := bytes.NewBuffer([]byte{})
-	err = qra.Search(ctx, buf, "session-on:web")
+	err = qra.Search(ctx, nil, "session-on:web")
 	if err != nil {
 		return "", err
 	}
-	log.Printf("Login : buf [%v]", buf.String())
 
 	return token, nil
 }

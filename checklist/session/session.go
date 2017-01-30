@@ -28,9 +28,10 @@ import (
 	"log"
 	"net/http"
 
+	srest "gopkg.in/jimmy-go/srest.v0"
+
 	"github.com/jimmy-go/qra"
 	"github.com/jimmy-go/qra-examples/checklist/sessions"
-	"gopkg.in/jimmy-go/srest.v0"
 )
 
 // Index endpoint /login GET

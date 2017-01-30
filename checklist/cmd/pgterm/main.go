@@ -1,4 +1,4 @@
-// Package menu contains menu validation for users.
+// Package main contains terminal session for pgmanager.
 //
 // MIT License
 //
@@ -21,72 +21,28 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-package menu
+package main
 
 import (
+	"flag"
 	"log"
 
-	"github.com/jimmy-go/qra"
-)
+	// import driver PostgreSQL
+	_ "github.com/lib/pq"
 
-// Menu struct represents UI menu.
-type Menu struct {
-	Name  string
-	Role  string
-	Icon  string
-	Link  string
-	Badge int
-}
+	"github.com/jimmy-go/qra/pgmanager"
+)
 
 var (
-	// Menus and roles required.
-	Menus = map[string]Menu{
-		"admin": Menu{
-			Name:  "Users",
-			Role:  "admins",
-			Icon:  "fa fa-users",
-			Link:  "/users",
-			Badge: 0,
-		},
-		"users": Menu{
-			Name:  "TO-DOs",
-			Role:  "users",
-			Icon:  "fa fa-list",
-			Link:  "/checklist",
-			Badge: 0,
-		},
-	}
+	connectURL = flag.String("db-url", "", "PostgreSQL connection url.")
 )
 
-// UserMenus returns user available menus.
-func UserMenus(userID string) []Menu {
-	var list []Menu
-	for i := range Menus {
-		menu := Menus[i]
+func main() {
+	flag.Parse()
+	log.SetFlags(log.Lshortfile)
 
-		log.Printf("UserMenus : menu [%v]", menu)
-
-		err := qra.Search(Ctx{userID}, nil, "read:"+menu.Role)
-		if err != nil {
-			continue
-		}
-		list = append(list, menu)
+	// register qra/pgmanager as qra.DefaultManager
+	if err := pgmanager.Terminal("postgres", *connectURL); err != nil {
+		log.Fatal(err)
 	}
-	return list
-}
-
-// Ctx satisfies Identity interface.
-type Ctx struct {
-	UserID string
-}
-
-// Me method.
-func (c Ctx) Me() string {
-	return c.UserID
-}
-
-// Session method.
-func (c Ctx) Session(dst interface{}) error {
-	// DO nothing
-	return nil
 }

@@ -32,8 +32,7 @@ import (
 	// import driver SQLite
 	_ "github.com/mattn/go-sqlite3"
 
-	// import driver PostgreSQL
-	_ "github.com/lib/pq"
+	srest "gopkg.in/jimmy-go/srest.v0"
 
 	"github.com/gorilla/context"
 	"github.com/jimmy-go/qra-examples/checklist/auth"
@@ -43,7 +42,6 @@ import (
 	"github.com/jimmy-go/qra-examples/checklist/sessions"
 	"github.com/jimmy-go/qra-examples/checklist/users"
 	"github.com/jimmy-go/qra/rawmanager"
-	"gopkg.in/jimmy-go/srest.v0"
 )
 
 var (
